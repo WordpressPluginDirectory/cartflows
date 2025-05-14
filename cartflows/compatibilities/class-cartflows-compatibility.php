@@ -75,7 +75,7 @@ if ( ! class_exists( 'Cartflows_Compatibility' ) ) {
 		}
 
 		/**
-		 * Add localized data for SureTriggers
+		 * Add localized data for OttoKit
 		 *
 		 * @param array $localize localized variables.
 		 * @return array $localize localized variables.
@@ -105,7 +105,7 @@ if ( ! class_exists( 'Cartflows_Compatibility' ) ) {
 		 * @return void
 		 */
 		public function load_compatibility_constants() {
-			define( 'CARTFLOWS_SURETRIGGERS_INTEGRATION_BASE_URL', 'https://app.suretriggers.com/' );
+			define( 'CARTFLOWS_SURETRIGGERS_INTEGRATION_BASE_URL', 'https://app.ottokit.com/' );
 		}
 
 		/**
@@ -136,6 +136,10 @@ if ( ! class_exists( 'Cartflows_Compatibility' ) ) {
 				require_once CARTFLOWS_DIR . 'compatibilities/plugins/class-cartflows-astra-addon-compatibility.php';
 			}
 
+			if ( defined( 'POSTNL_WC_PLUGIN_FILE' ) ) {
+				require_once CARTFLOWS_DIR . 'compatibilities/plugins/class-cartflows-postnl-for-woocommerce-compatibility.php';
+			}
+
 			// Load the gateway support files for the checkout page compatibility.
 			$this->load_gateway_compatibility();
 
@@ -161,6 +165,11 @@ if ( ! class_exists( 'Cartflows_Compatibility' ) ) {
 			if ( defined( 'SURE_TRIGGERS_VER' ) ) {
 				require_once CARTFLOWS_DIR . 'compatibilities/plugins/class-cartflows-suretriggers-compatibility.php';
 			}
+
+			// Compatibility file for DPD baltic shipping plugin.
+			if ( defined( 'DPD_NAME_VERSION' ) ) {
+				require_once CARTFLOWS_DIR . 'compatibilities/plugins/class-cartflows-dpd-baltic-compatibility.php';
+			}           
 		}
 
 		/**
