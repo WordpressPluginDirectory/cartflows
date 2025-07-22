@@ -1,3 +1,17 @@
+Version 2.1.15 - Tuesday, 22nd July 2025
+- Fix: Addressed a conflict with LearnDash and the Classic Editor plugin.
+- Fix: Resolved issues in the onboarding flow for a smoother setup experience.
+- Fix: Page Builder and Permalink options were not saving correctly on WordPress Multisite installations.
+
+Version 2.1.14 - Thursday, 26th June 2025
+- Improvement: Funnel import from a JSON file is now possible even when no funnels exist, as the Import button is displayed.
+- Fix: Fixed the issue of image render on Instant Checkout Thank you page.
+
+Version 2.1.13 - Monday, 16th June 2025
+- Improvement: Enhanced the Create New Product popup for a better user experience.
+- Fix: Resolved an issue where the Order Bump stayed selected after the product was removed when cart editing on checkout was enabled.
+- Fix: Exported funnel JSON files now include previously missing funnel settings data.
+
 Version 2.1.12 - Wednesday, 21th May 2025
 - Improvement: Improved the toggle button with improved handling of disabled states, making the toggle button more intuitive and user-friendly.
 - Improvement: Added compatibility for future release of CartFlows Pro.

@@ -3,7 +3,7 @@ Contributors: sujaypawar, wpcrafter
 Tags: woocommerce, funnel builder, sales funnels, custom checkout, WooCommerce checkout
 Requires at least: 5.8
 Tested up to: 6.8
-Stable tag: 2.1.12
+Stable tag: 2.1.15
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -379,6 +379,12 @@ Welcome to CartFlows\! Click here to access our comprehensive documentation and 
 * [Contact us](https://cartflows.com/contact/)
 * [Join the CartFlows community](https://www.facebook.com/groups/cartflows/)
 
+= How can I report a security bug? =
+
+We take plugin security extremely seriously. If you discover a security vulnerability, please report it in a safe and responsible manner.
+
+You can report the issue through our [Bug Bounty Program](https://brainstormforce.com/bug-bounty-program/).
+
 
 == Screenshots ==
 
@@ -388,6 +394,20 @@ Welcome to CartFlows\! Click here to access our comprehensive documentation and 
 4. Quickly re-arrange the steps.
 
 == Changelog ==
+
+= Version 2.1.15 - Tuesday, 22nd July 2025 =
+* Fix: Addressed a conflict with LearnDash and the Classic Editor plugin.
+* Fix: Resolved issues in the onboarding flow for a smoother setup experience.
+* Fix: Page Builder and Permalink options were not saving correctly on WordPress Multisite installations.
+
+= Version 2.1.14 - Thursday, 26th June 2025 =
+* Improvement: Funnel import from a JSON file is now possible even when no funnels exist, as the Import button is displayed.
+* Fix: Fixed the issue of image render on Instant Checkout Thank you page.
+
+= Version 2.1.13 - Monday, 16th June 2025 =
+* Improvement: Enhanced the Create New Product popup for a better user experience.
+* Fix: Resolved an issue where the Order Bump stayed selected after the product was removed when cart editing on checkout was enabled.
+* Fix: Exported funnel JSON files now include previously missing funnel settings data.
 
 = Version 2.1.12 - Wednesday, 21th May 2025 =
 * Improvement: Improved the toggle button with improved handling of disabled states, making the toggle button more intuitive and user-friendly.
