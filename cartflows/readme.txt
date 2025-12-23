@@ -1,9 +1,9 @@
-=== WooCommerce Checkout & Funnel Builder by CartFlows ===
+=== CartFlows - Checkout & Funnel Builder for WooCommerce ===
 Contributors: sujaypawar, wpcrafter
 Tags: woocommerce, funnel builder, sales funnels, custom checkout, WooCommerce checkout
 Requires at least: 5.8
 Tested up to: 6.8
-Stable tag: 2.1.15
+Stable tag: 2.1.19
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -12,7 +12,7 @@ WooCommerce checkout & funnel builder to boost conversion and revenue with beaut
 
 == Description ==
 
-**#1 WooCommerce Checkout & Funnel Builder by CartFlows – The Secret to High-Converting WooCommerce Stores** <br>
+**#1 CartFlows - Checkout & Funnel Builder for WooCommerce – The Secret to High-Converting WooCommerce Stores** <br>
 ★★★★★<br>
 
 [youtube https://www.youtube.com/watch?v=tCm60PWOd0M]
@@ -394,6 +394,35 @@ You can report the issue through our [Bug Bounty Program](https://brainstormforc
 4. Quickly re-arrange the steps.
 
 == Changelog ==
+
+= Version 2.1.19 - Monday, 22nd December 2025 =
+* Fix: Fixed the order review section not visible by default in instant layout.
+
+= Version 2.1.18 - Monday, 22nd December 2025 =
+* Improvement: Eliminated redundant backend API calls when fetching funnel data during funnel editing.
+* Fix: Fixed Dutch billing address formatting issues caused by Google Address Autocomplete after page refresh.
+* Fix: Resolved the dashboard stats AJAX warning that occurred during stats retrieval.
+* Fix: Fixed `_load_textdomain_just_in_time` notices triggered by internal libraries.
+* Fix: Prevented the selected shipping method from being cleared when changing the address on the checkout page.
+* Fix: Resolved a conflict with CartFlows and LearnDash where course descriptions failed to display after saving.
+* Fix: Fixed an issue where the Thank You page displayed both main and upsell products depite Replace Main Order was enabled.
+* Fix: Fixed custom logo behavior on instant layout styles so it renders as expected.
+* Fix: Fixed an issue where the CartFlows Thank You page failed to display when using the WebToffee PayPal Gateway.
+* Fix: Resolved an issue where the DatePicker selected the previous day when choosing past dates.
+
+= Version 2.1.17 - Monday, 17th November 2025 =
+* Improvement: Updated Google Fonts for improved consistency.
+* Improvement: Improved the Funnel Status toggle to make it more intuitive.
+* Improvement: Enhanced Funnel Test Mode by adding a dropdown for better usability.
+* Fix: Removed non-CartFlows revenue from the dashboard graph to ensure accurate reporting.
+* Fix: Removed cancelled-order revenue from the dashboard graph for correct revenue totals.
+* Fix: Fixed the Confirmation dialog failing to save Order Bump settings after confirmation.
+* Fix: Fixed custom CSS added within custom scripts settings not being applied issue.
+
+= Version 2.1.16 - Tuesday, 14th October 2025 =
+* Fix: Resolved the duplicate image issue while importing a ready-made template.
+* Fix: Improved the code performance by fixing the Rollback feature transient cache mismatch.
+* Fix: Improved UI/UX and mobile responsiveness on the CartFlows Dashboard and Conditional Order Bump panel.
 
 = Version 2.1.15 - Tuesday, 22nd July 2025 =
 * Fix: Addressed a conflict with LearnDash and the Classic Editor plugin.

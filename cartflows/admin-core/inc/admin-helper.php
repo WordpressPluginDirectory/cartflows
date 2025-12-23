@@ -241,7 +241,6 @@ class AdminHelper {
 		} else {
 			update_option( $key, $value );
 		}
-
 	}
 
 	/**
@@ -740,7 +739,6 @@ class AdminHelper {
 		}
 
 		return $steps;
-
 	}
 
 	/**
@@ -1014,7 +1012,6 @@ class AdminHelper {
 			'total_offers_revenue' => '0',
 			'total_visits'         => '0',
 		);
-
 	}
 
 
@@ -1233,4 +1230,3 @@ class AdminHelper {
 		update_option( 'cartflows_funnel_creation_method', $funnel_creation_stats );
 	}
 }
-

@@ -240,16 +240,6 @@ class FlowMeta {
 						'value'         => get_post_field( 'post_name', $flow_id ),
 						'display_align' => 'vertical',
 					),
-					'sandbox_mode'  => array(
-						'type'         => 'toggle',
-						'label'        => __( 'Enable Test Mode', 'cartflows' ),
-						'name'         => 'wcf-testing',
-						'value'        => get_post_meta( $flow_id, 'wcf-testing', true ),
-						'tooltip'      => ! $is_store_checkout_flow 
-							? __( 'The Test Mode automatically adds sample products to your funnel if you haven\'t selected any. This helps you preview and test the checkout experience easily.', 'cartflows' ) 
-							: __( 'The Test Mode automatically adds sample products to your store checkout funnel if you haven\'t selected any. This helps you preview and test the experience easily on all steps except the Checkout page.', 'cartflows' ),
-						'is_fullwidth' => true,
-					),
 					'flow_indexing' => array(
 						'type'          => 'select',
 						'name'          => 'wcf-flow-indexing',

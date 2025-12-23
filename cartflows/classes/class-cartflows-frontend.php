@@ -195,7 +195,6 @@ class Cartflows_Frontend {
 				}
 			}
 		}
-
 	}
 
 	/**
@@ -522,7 +521,7 @@ class Cartflows_Frontend {
 		}
 
 		if ( '' !== $script ) {
-			if ( false === strpos( $script, htmlentities( '<script' ) ) ) {
+			if ( false === strpos( $script, htmlentities( '<script' ) ) && false === strpos( $script, htmlentities( '<style' ) ) ) {
 				$script = '<script>' . $script . '</script>';
 			}
 			echo '<!-- Custom CartFlows Script -->';
@@ -583,7 +582,6 @@ class Cartflows_Frontend {
 		$classes[] = 'cartflows-' . CARTFLOWS_VER;
 
 		return $classes;
-
 	}
 
 	/**
@@ -631,7 +629,6 @@ class Cartflows_Frontend {
 		}
 
 		return $script;
-
 	}
 
 	/**
