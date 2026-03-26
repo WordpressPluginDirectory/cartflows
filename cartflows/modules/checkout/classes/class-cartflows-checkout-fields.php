@@ -42,9 +42,9 @@ class Cartflows_Checkout_Fields {
 	 * Constructor
 	 */
 	public function __construct() {
-
-		add_action( 'init', array( $this, 'init_actions' ) );
-		add_action( 'wp', array( $this, 'wp_actions' ) );
+		// Register field filters directly instead of deferring to the wp/init hooks.
+		// WooCommerce caches get_checkout_fields() on first call, which can occur before those hooks fire.
+		$this->checkout_field_actions();
 
 		add_action( 'wp_enqueue_scripts', array( $this, 'add_frontend_scripts' ) );
 
@@ -52,28 +52,8 @@ class Cartflows_Checkout_Fields {
 	}
 
 	/**
-	 * Trigger action on init.
+	 *  Add frontend scripts.
 	 */
-	public function init_actions() {
-
-		if ( wp_doing_ajax() && isset( $_GET['wcf_checkout_id'] ) ) { //phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$this->checkout_field_actions();
-		}
-	}
-
-	/**
-	 * Trigger action on wp.
-	 */
-	public function wp_actions() {
-
-		if ( _is_wcf_checkout_type() ) {
-			$this->checkout_field_actions();
-		}
-	}
-
-		/**
-		 *  Add frontend scripts.
-		 */
 	public function add_frontend_scripts() {
 
 		if ( ! _is_wcf_checkout_type() ) {
@@ -172,7 +152,6 @@ class Cartflows_Checkout_Fields {
 		add_filter( 'woocommerce_get_country_locale_default', array( $this, 'prepare_country_locale' ) );
 
 		add_filter( 'woocommerce_default_address_fields', array( $this, 'woo_default_address_fields' ), 1000 );
-
 	}
 
 		/**
@@ -613,6 +592,9 @@ class Cartflows_Checkout_Fields {
 				if ( isset( $fields[ $type ] ) && is_array( $fields[ $type ] ) ) {
 
 					foreach ( $fields[ $type ] as $key => $field ) {
+						if ( ! empty( $fields[ $type ][ $key ]['type'] ) && 'file' === $fields[ $type ][ $key ]['type'] ) {
+							continue;
+						}
 						// Add label as placeholder if the placeholder value is empty.
 						if ( empty( $fields[ $type ][ $key ]['placeholder'] ) ) {
 							$fields[ $type ][ $key ]['placeholder'] = $fields[ $type ][ $key ]['label'];

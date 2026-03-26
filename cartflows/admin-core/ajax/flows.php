@@ -66,6 +66,7 @@ class Flows extends AjaxBase {
 			'update_status',
 			'update_store_checkout_status',
 			'hide_instant_checkout_notice',
+			'get_published_flows',
 		);
 
 		$this->init_ajax_events( $ajax_events );
@@ -112,7 +113,6 @@ class Flows extends AjaxBase {
 		);
 
 		wp_send_json_success( $response_data );
-
 	}
 
 	/**
@@ -277,7 +277,11 @@ class Flows extends AjaxBase {
 
 		$flow_ids = isset( $_POST['flow_ids'] ) ? array_map( 'intval', explode( ',', sanitize_text_field( $_POST['flow_ids'] ) ) ) : array();
 
-		$new_status = isset( $_POST['new_status'] ) ? sanitize_text_field( wp_unslash( $_POST['new_status'] ) ) : '';
+		$new_status       = isset( $_POST['new_status'] ) ? sanitize_text_field( wp_unslash( $_POST['new_status'] ) ) : '';
+		$allowed_statuses = array( 'publish', 'draft', 'trash', 'pending' );
+		if ( ! in_array( $new_status, $allowed_statuses, true ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid post status.', 'cartflows' ) ) );
+		}
 
 		foreach ( $flow_ids as $key => $flow_id ) {
 
@@ -680,7 +684,6 @@ class Flows extends AjaxBase {
 			'redirect_url' => admin_url( 'post.php?action=edit&post=' . $new_flow_id ),
 		);
 		wp_send_json_success( $response_data );
-
 	}
 
 	/**
@@ -919,7 +922,11 @@ class Flows extends AjaxBase {
 			wp_send_json_error( $response_data );
 		}
 
-		$new_status = isset( $_POST['new_status'] ) ? sanitize_text_field( wp_unslash( $_POST['new_status'] ) ) : '';
+		$new_status       = isset( $_POST['new_status'] ) ? sanitize_text_field( wp_unslash( $_POST['new_status'] ) ) : '';
+		$allowed_statuses = array( 'publish', 'draft', 'trash', 'pending' );
+		if ( ! in_array( $new_status, $allowed_statuses, true ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid post status.', 'cartflows' ) ) );
+		}
 
 		/* Get Steps */
 		$steps = get_post_meta( $flow_id, 'wcf-steps', true );
@@ -1006,7 +1013,7 @@ class Flows extends AjaxBase {
 		$common_settings['global_checkout']          = $checkout_id;
 		$common_settings['override_global_checkout'] = $override_status;
 
-		update_option( '_cartflows_common', $common_settings );
+		AdminHelper::update_admin_settings_option( '_cartflows_common', $common_settings, false );
 
 		do_action( 'cartflows_after_save_store_checkout' );
 
@@ -1163,4 +1170,62 @@ class Flows extends AjaxBase {
 		wp_send_json( $result );
 	}
 
+	/**
+	 * Get published flows for analytics dropdown.
+	 *
+	 * Returns only ID and title for better performance.
+	 *
+	 * @since 2.1.19
+	 * @return void
+	 */
+	public function get_published_flows() {
+		$response_data = array( 'message' => $this->get_error_msg( 'permission' ) );
+
+		/**
+		 * Check permission
+		 */
+		if ( ! current_user_can( 'cartflows_manage_flows_steps' ) ) {
+			wp_send_json_error( $response_data );
+		}
+
+		/**
+		 * Nonce verification
+		 */
+		if ( ! check_ajax_referer( 'cartflows_get_published_flows', 'security', false ) ) {
+			$response_data = array( 'message' => $this->get_error_msg( 'nonce' ) );
+			wp_send_json_error( $response_data );
+		}
+
+		// Query only IDs for better performance.
+		$flow_ids = get_posts(
+			array(
+				'post_type'              => CARTFLOWS_FLOW_POST_TYPE,
+				'post_status'            => 'publish',
+				'posts_per_page'         => -1,
+				'fields'                 => 'ids',
+				'orderby'                => 'title',
+				'order'                  => 'ASC',
+				'no_found_rows'          => true, // Skip pagination calculations.
+				'update_post_meta_cache' => false, // Skip meta cache.
+				'update_post_term_cache' => false, // Skip term cache.
+			)
+		);
+
+		$flows = array();
+
+		if ( ! empty( $flow_ids ) && is_array( $flow_ids ) ) {
+			foreach ( $flow_ids as $flow_id ) {
+				$flow_title = get_the_title( $flow_id );
+
+				if ( ! empty( $flow_title ) ) {
+					$flows[] = array(
+						'flow_id'    => $flow_id,
+						'flow_title' => $flow_title,
+					);
+				}
+			}
+		}
+
+		wp_send_json_success( array( 'flows' => $flows ) );
+	}
 }

@@ -262,8 +262,18 @@ if ( ! class_exists( 'CartFlows_Importer' ) ) :
 								continue;
 							}
 
+							// Security: Only allow meta keys matching known prefixes to prevent arbitrary DB writes.
+							if ( ! Cartflows_Helper::get_instance()->is_meta_key_allowed_for_import( $meta_key ) ) {
+								continue;
+							}
+
 							if ( is_serialized( $mvalue[0], true ) ) {
-								$meta_value = maybe_unserialize( stripslashes( $mvalue[0] ) );
+								// Security: Using unserialize with allowed_classes=>false to prevent object injection.
+								$meta_value = unserialize( stripslashes( $mvalue[0] ), array( 'allowed_classes' => false ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize, PHPCompatibility.FunctionUse.NewFunctionParameters.unserialize_optionsFound
+								// Drop malicious payloads completely to prevent fatal errors.
+								if ( false === $meta_value || is_object( $meta_value ) ) {
+									$meta_value = '';
+								}
 							} else {
 								$meta_value = $mvalue[0];
 							}

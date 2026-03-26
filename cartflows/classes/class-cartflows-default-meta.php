@@ -114,6 +114,10 @@ class Cartflows_Default_Meta {
 					'default'  => $this->get_show_design_meta_value(),
 					'sanitize' => 'FILTER_SANITIZE_STRING',
 				),
+				'wcf-disable-step'                         => array(
+					'default'  => 'no',
+					'sanitize' => 'FILTER_SANITIZE_STRING',
+				),
 				'wcf-field-google-font-url'                => array(
 					'default'  => '',
 					'sanitize' => 'FILTER_SANITIZE_URL',
@@ -296,6 +300,14 @@ class Cartflows_Default_Meta {
 					'default'  => '',
 					'sanitize' => 'FILTER_SCRIPT',
 				),
+				'wcf-step-custom-js'                       => array(
+					'default'  => '',
+					'sanitize' => 'FILTER_SCRIPT',
+				),
+				'wcf-step-custom-css'                      => array(
+					'default'  => '',
+					'sanitize' => 'FILTER_SCRIPT',
+				),
 				'wcf-step-note'                            => array(
 					'default'  => '',
 					'sanitize' => 'FILTER_SANITIZE_STRING',
@@ -422,6 +434,14 @@ class Cartflows_Default_Meta {
 					'default'  => '',
 					'sanitize' => 'FILTER_SCRIPT',
 				),
+				'wcf-flow-custom-js'                      => array(
+					'default'  => '',
+					'sanitize' => 'FILTER_SCRIPT',
+				),
+				'wcf-flow-custom-css'                     => array(
+					'default'  => '',
+					'sanitize' => 'FILTER_SCRIPT',
+				),
 				// Global Color Pallet color options.
 				'wcf-enable-gcp-styling'                  => array(
 					'default'  => 'no',
@@ -524,7 +544,6 @@ class Cartflows_Default_Meta {
 		}
 
 		return apply_filters( "cartflows_checkout_meta_{$key}", $value );
-
 	}
 
 	/**
@@ -551,6 +570,10 @@ class Cartflows_Default_Meta {
 			self::$thankyou_fields = array(
 				'wcf-enable-design-settings'               => array(
 					'default'  => $this->get_show_design_meta_value(),
+					'sanitize' => 'FILTER_SANITIZE_STRING',
+				),
+				'wcf-disable-step'                         => array(
+					'default'  => 'no',
 					'sanitize' => 'FILTER_SANITIZE_STRING',
 				),
 				'wcf-field-google-font-url'                => array(
@@ -630,6 +653,14 @@ class Cartflows_Default_Meta {
 					'sanitize' => 'FILTER_WP_KSES_POST',
 				),
 				'wcf-custom-script'                        => array(
+					'default'  => '',
+					'sanitize' => 'FILTER_SCRIPT',
+				),
+				'wcf-step-custom-js'                       => array(
+					'default'  => '',
+					'sanitize' => 'FILTER_SCRIPT',
+				),
+				'wcf-step-custom-css'                      => array(
 					'default'  => '',
 					'sanitize' => 'FILTER_SCRIPT',
 				),
@@ -730,11 +761,23 @@ class Cartflows_Default_Meta {
 
 		if ( null === self::$landing_fields ) {
 			self::$landing_fields = array(
-				'wcf-custom-script' => array(
+				'wcf-disable-step'    => array(
+					'default'  => 'no',
+					'sanitize' => 'FILTER_SANITIZE_STRING',
+				),
+				'wcf-custom-script'   => array(
 					'default'  => '',
 					'sanitize' => 'FILTER_SCRIPT',
 				),
-				'wcf-step-note'     => array(
+				'wcf-step-custom-js'  => array(
+					'default'  => '',
+					'sanitize' => 'FILTER_SCRIPT',
+				),
+				'wcf-step-custom-css' => array(
+					'default'  => '',
+					'sanitize' => 'FILTER_SCRIPT',
+				),
+				'wcf-step-note'       => array(
 					'default'  => '',
 					'sanitize' => 'FILTER_SANITIZE_STRING',
 				),
@@ -754,6 +797,10 @@ class Cartflows_Default_Meta {
 		if ( null === self::$optin_fields ) {
 			self::$optin_fields = array(
 
+				'wcf-disable-step'               => array(
+					'default'  => 'no',
+					'sanitize' => 'FILTER_SANITIZE_STRING',
+				),
 				'wcf-optin-product'              => array(
 					'default'  => array(),
 					'sanitize' => 'FILTER_CARTFLOWS_ARRAY',
@@ -885,6 +932,14 @@ class Cartflows_Default_Meta {
 
 				/* Script */
 				'wcf-custom-script'              => array(
+					'default'  => '',
+					'sanitize' => 'FILTER_SCRIPT',
+				),
+				'wcf-step-custom-js'             => array(
+					'default'  => '',
+					'sanitize' => 'FILTER_SCRIPT',
+				),
+				'wcf-step-custom-css'            => array(
 					'default'  => '',
 					'sanitize' => 'FILTER_SCRIPT',
 				),

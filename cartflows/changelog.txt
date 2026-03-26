@@ -1,3 +1,43 @@
+Version 2.2.4 - Wednesday, 25th March 2026
+- New: Added Power Coupons to the Addons page for quick access and activation.
+- New: Introduced WordPress Abilities API integration to enable AI-powered automation for CartFlows.
+- Security Fix: Hardened the security of the plugin.
+- Fix: Fixed Store Checkout setting not persisting on WordPress Multisite subsites.
+
+Version 2.2.3 - Tuesday, 10th March 2026
+- New: Added a new layout for the Thank You page.
+- New: Introduced CartFlows native webhook integration.
+- New: Added global custom JavaScript and CSS support, allowing users to add custom scripts across all funnels.
+- Improvement: Introduced separate Code Editors for JavaScript and CSS, replacing the textarea used for custom scripts in Funnels and Steps settings.
+- Fix: Checkout: Fixed WooCommerce Stripe Express Checkout button misalignment in the Modern Checkout layout.
+- Fix: Checkout: Fixed order summary position setting not being applied on the frontend when Instant Layout is enabled for checkout.
+- Fix: Fixed JSON response error in the block editor while updating a CartFlows step.
+- Fix: Checkout: Fixed missing checkmark for Order Bump when positioned before the checkout form with Instant Layout enabled.
+- Fix: Fixed dashboard icon and layout misalignment in the admin menu.
+
+Version 2.2.2 - Tuesday, 24th February 2026
+- New: Added Learn tab with guided setup to help users understand and configure core CartFlows features.
+- New: Introduced Order Pay page template for Store Checkout.
+- Improvement: Added toggle setting to enable or disable steps in the backend.
+- Improvement: Added file input field support in the Custom Editor within Checkout step settings.
+- Fix: Checkout: Fixed preview not opening in full screen in Checkout Offer settings in the backend.
+- Fix: Checkout: Improved UX for the Dynamic Offers product condition setting in the backend.
+- Fix: Checkout: Fixed an issue for missing favicon on Instant Checkout in the frontend.
+
+Version 2.2.1 - Wednesday, 4th February 2026
+- New: Introduced Tutor LMS compatibility allowing non-enrolled users to be redirected to CartFlows templates.
+- Improvement: Introduced the `cartflows_allow_remove_permalink_base` filter to allow removal of the permalink base from CartFlows funnel URLs.
+- Fix: Prevented duplicate products from being added in checkout product settings in the backend.
+
+Version 2.2.0 - Tuesday, 27th January 2026
+- Security Fix: Hardened the security of the plugin suggested by PatchStack.
+- Improvement: Added new unified analytics screens for easier funnel performance tracking.
+- Fix: Resolved an issue where the Order Bump description did not update in real time.
+- Fix: Fixed a conflict where Smart Coupons actions failed to add products via coupons.
+- Fix: Removed PHP deprecation notices when using Bricks Builder on multisite.
+- Fix: Prevented step titles from redirecting to the page builder editor when using Instant Layout.
+- Fix: Corrected date filter issues on the funnel admin page.
+
 Version 2.1.19 - Monday, 22nd December 2025
 - Fix: Fixed the order review section not visible by default in instant layout.
 

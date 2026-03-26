@@ -187,7 +187,6 @@ class Cartflows_Checkout_Meta_Data extends Cartflows_Step_Meta_Base {
 			'page_settings'   => $this->get_page_settings( $step_id ),
 			'design_settings' => $design_settings,
 		);
-
 	}
 
 	/**
@@ -402,7 +401,6 @@ class Cartflows_Checkout_Meta_Data extends Cartflows_Step_Meta_Base {
 							'value'             => $options['wcf-heading-font-family'],
 							'font_weight_name'  => 'wcf-heading-font-weight',
 							'font_weight_value' => $options['wcf-heading-font-weight'],
-							'for'               => 'wcf-heading',
 							'display_align'     => 'vertical',
 							'conditions'        => array(
 								'fields' => array(
@@ -413,7 +411,6 @@ class Cartflows_Checkout_Meta_Data extends Cartflows_Step_Meta_Base {
 									),
 								),
 							),
-							'display_align'     => 'vertical',
 						),
 
 						'input-field-section'       => array(
@@ -465,7 +462,6 @@ class Cartflows_Checkout_Meta_Data extends Cartflows_Step_Meta_Base {
 							'value'             => $options['wcf-input-font-family'],
 							'font_weight_name'  => 'wcf-input-font-weight',
 							'font_weight_value' => $options['wcf-input-font-weight'],
-							'for'               => 'wcf-input',
 							'conditions'        => array(
 								'fields' => array(
 									array(
@@ -636,7 +632,6 @@ class Cartflows_Checkout_Meta_Data extends Cartflows_Step_Meta_Base {
 							'value'             => $options['wcf-button-font-family'],
 							'font_weight_name'  => 'wcf-button-font-weight',
 							'font_weight_value' => $options['wcf-button-font-weight'],
-							'for'               => 'wcf-button',
 							'conditions'        => array(
 								'fields' => array(
 									array(
@@ -1006,30 +1001,67 @@ class Cartflows_Checkout_Meta_Data extends Cartflows_Step_Meta_Base {
 
 		$options = $this->get_data( $step_id );
 
+		// Determine whether to show CodeMirror editors or the legacy textarea.
+		$show_code_editor = AdminHelper::should_show_code_editor();
+
+		$general_fields = array(
+			'slug'                    => array(
+				'type'          => 'text',
+				'name'          => 'step_post_name',
+				'label'         => __( 'Step Slug', 'cartflows' ),
+				'value'         => get_post_field( 'post_name' ),
+				'display_align' => 'vertical',
+				'tooltip'       => __( 'This is the name (slug) of the current step. Changing it will update the URL for this step, so be cautious!', 'cartflows' ),
+			),
+			'wcf-disable-step-toggle' => array(
+				'type'         => 'toggle',
+				'label'        => __( 'Disable step', 'cartflows' ),
+				'name'         => 'wcf-disable-step',
+				'value'        => $options['wcf-disable-step'],
+				'tooltip'      => __( 'Turn this on to disable the step', 'cartflows' ),
+				'is_fullwidth' => true,
+			),
+		);
+
+		if ( $show_code_editor ) {
+			// Migration completed: show separate JS and CSS CodeMirror editors.
+			$general_fields['wcf-checkout-custom-js']  = array(
+				'type'          => 'code',
+				'label'         => __( 'Custom JavaScript', 'cartflows' ),
+				'name'          => 'wcf-step-custom-js',
+				'value'         => $options['wcf-step-custom-js'],
+				'display_align' => 'vertical',
+				'language'      => 'javascript',
+				'tooltip'       => __( 'Add your own custom JavaScript code here. Do not include script tags.', 'cartflows' ),
+			);
+			$general_fields['wcf-checkout-custom-css'] = array(
+				'type'          => 'code',
+				'label'         => __( 'Custom CSS', 'cartflows' ),
+				'name'          => 'wcf-step-custom-css',
+				'value'         => $options['wcf-step-custom-css'],
+				'display_align' => 'vertical',
+				'language'      => 'css',
+				'tooltip'       => __( 'Add your own custom CSS code here. Do not include style tags.', 'cartflows' ),
+			);
+		} else {
+			// Migration not completed: show the legacy combined textarea.
+			$general_fields['wcf-checkout-custom-script'] = array(
+				'type'          => 'textarea',
+				'label'         => __( 'Custom Script', 'cartflows' ),
+				'name'          => 'wcf-custom-script',
+				'value'         => $options['wcf-custom-script'],
+				'display_align' => 'vertical',
+				'tooltip'       => __( 'Add your own custom code here. If you\'re adding CSS, make sure to wrap it inside &lt;style&gt; tags.', 'cartflows' ),
+			);
+		}
+
 		$settings = array(
 			'settings' => array(
 				'general'  => array(
 					'title'    => __( 'General', 'cartflows' ),
 					'slug'     => 'general',
 					'priority' => 20,
-					'fields'   => array(
-						'slug'                       => array(
-							'type'          => 'text',
-							'name'          => 'step_post_name',
-							'label'         => __( 'Step Slug', 'cartflows' ),
-							'value'         => get_post_field( 'post_name' ),
-							'display_align' => 'vertical',
-							'tooltip'       => __( 'This is the name (slug) of the current step. Changing it will update the URL for this step, so be cautious!', 'cartflows' ),
-						),
-						'wcf-checkout-custom-script' => array(
-							'type'          => 'textarea',
-							'label'         => __( 'Custom Script', 'cartflows' ),
-							'name'          => 'wcf-custom-script',
-							'value'         => $options['wcf-custom-script'],
-							'display_align' => 'vertical',
-							'tooltip'       => __( 'Add your own custom code here. If you\'re adding CSS, make sure to wrap it inside &lt;style&gt; tags.', 'cartflows' ),
-						),
-					),
+					'fields'   => $general_fields,
 				),
 				'advanced' => array(
 					'title'    => esc_html__( 'Advanced', 'cartflows' ),
@@ -1097,7 +1129,6 @@ class Cartflows_Checkout_Meta_Data extends Cartflows_Step_Meta_Base {
 		}
 
 		return $optin_data;
-
 	}
 
 	/**
@@ -1110,7 +1141,6 @@ class Cartflows_Checkout_Meta_Data extends Cartflows_Step_Meta_Base {
 		$meta_option = wcf()->options->get_checkout_fields( $post_id );
 
 		return $meta_option;
-
 	}
 
 	/**
@@ -1128,7 +1158,6 @@ class Cartflows_Checkout_Meta_Data extends Cartflows_Step_Meta_Base {
 			$formatted_name = rawurldecode( $product_object->get_formatted_name() );
 		}
 		return $formatted_name;
-
 	}
 
 	/**
@@ -1515,12 +1544,9 @@ class Cartflows_Checkout_Meta_Data extends Cartflows_Step_Meta_Base {
 
 		return $field_args;
 	}
-
-
 }
 
 /**
  * Kicking this off by calling 'get_instance()' method.
  */
 Cartflows_Checkout_Meta_Data::get_instance();
-

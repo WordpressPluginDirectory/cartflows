@@ -141,12 +141,12 @@ if ( ! class_exists( 'Cartflows_Loader' ) ) {
 			define( 'CARTFLOWS_DIR', plugin_dir_path( CARTFLOWS_FILE ) );
 			define( 'CARTFLOWS_URL', plugins_url( '/', CARTFLOWS_FILE ) );
 
-			define( 'CARTFLOWS_VER', '2.1.19' );
+			define( 'CARTFLOWS_VER', '2.2.4' );
 			define( 'CARTFLOWS_SLUG', 'cartflows' );
 			define( 'CARTFLOWS_SETTINGS', 'cartflows_settings' );
 			define( 'CARTFLOWS_NAME', 'CartFlows' );
 
-			define( 'CARTFLOWS_REQ_CF_PRO_VER', '2.1.0' );
+			define( 'CARTFLOWS_REQ_CF_PRO_VER', '2.2.0' );
 
 			// For backward compatibility we are setting CARTFLOWS_LEGACY_ADMIN to false, so pro-loader for new UI will be load.
 			define( 'CARTFLOWS_LEGACY_ADMIN', false );
@@ -362,6 +362,11 @@ if ( ! class_exists( 'Cartflows_Loader' ) ) {
 			if ( ! class_exists( 'Cartflows_Nps_Survey' ) ) {
 				require_once CARTFLOWS_DIR . 'libraries/class-cartflows-nps-survey.php';
 			}
+
+			// Load the CartFlows Pointer library.
+			if ( ! class_exists( 'Cartflows_Pointer' ) ) {
+				require_once CARTFLOWS_DIR . 'libraries/cartflows-pointer/class-cartflows-pointer.php';
+			}
 		}
 
 		/**
@@ -496,6 +501,10 @@ if ( ! class_exists( 'Cartflows_Loader' ) ) {
 			include_once CARTFLOWS_DIR . 'classes/deprecated/deprecated-hooks.php';
 
 			include_once CARTFLOWS_DIR . 'modules/gutenberg/classes/class-cartflows-block-loader.php';
+
+			// Abilities API (WordPress 6.9+).
+			require_once CARTFLOWS_DIR . 'abilities/class-cartflows-abilities-loader.php';
+			include_once CARTFLOWS_DIR . 'modules/webhook/class-cartflows-webhook-loader.php';
 		}
 
 		/**

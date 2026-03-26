@@ -748,7 +748,7 @@ function wcf_show_deprecated_step_notes() {
  * This function determines whether file modifications (such as updates and installations)
  * are disabled by checking the DISALLOW_FILE_MODS constant.
  *
- * @since x.x.x
+ * @since 2.2.0
  * @return bool True if file modifications are disabled, false otherwise.
  */
 function wcf_file_mod_disabled() {

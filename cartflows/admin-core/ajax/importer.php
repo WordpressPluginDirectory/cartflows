@@ -120,7 +120,6 @@ class Importer extends AjaxBase {
 		}
 
 		wp_send_json_success( $response_data );
-
 	}
 
 	/**
@@ -232,7 +231,6 @@ class Importer extends AjaxBase {
 			'flows'     => wp_json_encode( $flows ),
 		);
 		wp_send_json_success( $response_data );
-
 	}
 
 	/**
@@ -433,7 +431,6 @@ class Importer extends AjaxBase {
 			'redirect_url' => admin_url( 'post.php?action=edit&post=' . $new_step_id ),
 		);
 		wp_send_json_success( $response_data );
-
 	}
 
 	/**
@@ -442,7 +439,7 @@ class Importer extends AjaxBase {
 	public function activate_plugin() {
 		$response_data = array( 'message' => $this->get_error_msg( 'permission' ) );
 
-		if ( ! current_user_can( 'cartflows_manage_flows_steps' ) ) {
+		if ( ! current_user_can( 'cartflows_manage_flows_steps' ) || ! current_user_can( 'activate_plugins' ) ) {
 			wp_send_json_error( $response_data );
 		}
 
@@ -504,7 +501,7 @@ class Importer extends AjaxBase {
 		// Verify Nonce.
 		$response_data = array( 'message' => $this->get_error_msg( 'permission' ) );
 
-		if ( ! current_user_can( 'cartflows_manage_flows_steps' ) ) {
+		if ( ! current_user_can( 'cartflows_manage_flows_steps' ) || ! current_user_can( 'switch_themes' ) ) {
 			wp_send_json_error( $response_data );
 		}
 
@@ -999,7 +996,6 @@ class Importer extends AjaxBase {
 		wcf()->logger->import_log( 'COMPLETE! Importing Step' );
 
 		wp_send_json_success( $response_data );
-
 	}
 
 	/**
@@ -1117,7 +1113,6 @@ class Importer extends AjaxBase {
 		wcf()->logger->import_log( 'COMPLETE! Importing Step' );
 
 		wp_send_json_success( $response_data );
-
 	}
 
 	/**
@@ -1181,7 +1176,6 @@ class Importer extends AjaxBase {
 		do_action( 'cartflows_after_template_import', $new_step_id, $response );
 
 		wcf()->logger->import_log( 'COMPLETE! Importing Step' );
-
 	}
 
 	/**
@@ -1294,7 +1288,6 @@ class Importer extends AjaxBase {
 		do_action( 'cartflows_after_template_import', $new_step_id, $response );
 
 		wcf()->logger->import_log( 'COMPLETE! Importing Step' );
-
 	}
 
 	/**
@@ -1318,12 +1311,30 @@ class Importer extends AjaxBase {
 				continue;
 			}
 
+			// Security: Only allow meta keys matching known prefixes to prevent arbitrary DB writes.
+			if ( ! \Cartflows_Helper::get_instance()->is_meta_key_allowed_for_import( $meta_key ) ) {
+				continue;
+			}
+
 			$meta_value = isset( $meta_value[0] ) ? $meta_value[0] : '';
 
 			if ( $meta_value ) {
 
 				if ( is_serialized( $meta_value, true ) ) {
-					$raw_data = maybe_unserialize( stripslashes( $meta_value ) );
+					// Security: Using unserialize with allowed_classes=>false to prevent object injection.
+					$raw_data = unserialize( stripslashes( $meta_value ), array( 'allowed_classes' => false ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize, PHPCompatibility.FunctionUse.NewFunctionParameters.unserialize_optionsFound
+					// Drop malicious payloads completely to prevent fatal errors.
+					// Security: Block serialized meta that contains nested PHP objects.
+					// Even with allowed_classes => false, unserialized payloads may contain
+					// __PHP_Incomplete_Class instances which WordPress attempts to mutate
+					// during wp_unslash(), causing fatal errors and violating object safety.
+					if (
+						false === $raw_data ||
+						$this->has_nested_object_payload( $raw_data )
+					) {
+						$raw_data = '';
+						continue;
+					}
 				} elseif ( is_array( $meta_value ) ) {
 					$raw_data = json_decode( stripslashes( $meta_value ), true );
 				} else {
@@ -1342,13 +1353,10 @@ class Importer extends AjaxBase {
 				if ( '_elementor_data' !== $meta_key && '_elementor_draft' !== $meta_key && '_fl_builder_data' !== $meta_key && '_fl_builder_draft' !== $meta_key ) {
 					if ( is_array( $raw_data ) ) {
 						wcf()->logger->import_log( '✓ Added post meta ' . $meta_key /* . ' | ' . wp_json_encode( $raw_data ) */ );
-					} else {
-						if ( ! is_object( $raw_data ) ) {
+					} elseif ( ! is_object( $raw_data ) ) {
 							wcf()->logger->import_log( '✓ Added post meta ' . $meta_key /* . ' | ' . $raw_data */ );
-						}
 					}
 				}
-
 				update_post_meta( $post_id, $meta_key, $raw_data );
 			}
 		}
@@ -1390,7 +1398,11 @@ class Importer extends AjaxBase {
 				if ( $meta_value ) {
 
 					if ( is_serialized( $meta_value, true ) ) {
-						$raw_data = maybe_unserialize( stripslashes( $meta_value ) );
+						// Security: Using unserialize with allowed_classes=>false to prevent object injection.
+						$raw_data = unserialize( stripslashes( $meta_value ), array( 'allowed_classes' => false ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize, PHPCompatibility.FunctionUse.NewFunctionParameters.unserialize_optionsFound
+						if ( false === $raw_data || is_object( $raw_data ) ) {
+							continue;
+						}
 					} elseif ( is_array( $meta_value ) ) {
 						$raw_data = json_decode( stripslashes( $meta_value ), true );
 					} else {
@@ -1510,7 +1522,6 @@ class Importer extends AjaxBase {
 				$this->elementor_find_and_replace_template_data( $element['elements'], $posted_data );
 			}
 		}
-
 	}
 
 	/**
@@ -1541,7 +1552,6 @@ class Importer extends AjaxBase {
 				$this->gutenberg_find_and_replace_template_data( $element['innerBlocks'], $posted_data );
 			}
 		}
-
 	}
 
 	/**
@@ -1609,5 +1619,36 @@ class Importer extends AjaxBase {
 		}
 
 		wcf()->logger->import_log( 'End: ' . __CLASS__ . ' :: ' . __FUNCTION__ );
+	}
+
+	/**
+	 * Detect whether the given value contains objects at any depth.
+	 *
+	 * This is used as a hard security guard to prevent storing
+	 * unserialized payloads that contain PHP objects (including
+	 * __PHP_Incomplete_Class), which can cause fatal errors and
+	 * violate object injection protections.
+	 *
+	 * @since 2.2.1
+	 *
+	 * @param mixed $value The value to inspect recursively.
+	 *
+	 * @return bool True if an object is found anywhere in the payload.
+	 */
+	private function has_nested_object_payload( $value ) {
+
+		if ( is_object( $value ) ) {
+			return true;
+		}
+
+		if ( is_array( $value ) ) {
+			foreach ( $value as $v ) {
+				if ( $this->has_nested_object_payload( $v ) ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 }

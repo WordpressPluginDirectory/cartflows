@@ -161,7 +161,6 @@ class MetaData extends AjaxBase {
 		}
 
 		wp_send_json( $products_found );
-
 	}
 
 	/**
@@ -325,5 +324,4 @@ class MetaData extends AjaxBase {
 
 		return $original_price;
 	}
-
 }

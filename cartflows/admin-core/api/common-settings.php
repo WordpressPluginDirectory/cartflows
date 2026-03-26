@@ -68,7 +68,7 @@ class CommonSettings extends ApiBase {
 
 		$options['cartflows_delete_plugin_data']     = get_option( 'cartflows_delete_plugin_data' );
 		$options['cartflows_stats_report_emails']    = get_option( 'cartflows_stats_report_emails', 'enable' );
-		$options['cf_analytics_optin']               = get_option( 'cf_analytics_optin', 'no' );
+		$options['cf_usage_optin']                   = get_option( 'cf_usage_optin', 'no' );
 		$options['cartflows_stats_report_email_ids'] = get_option( 'cartflows_stats_report_email_ids', get_option( 'admin_email' ) );
 
 		return $options;
@@ -125,7 +125,8 @@ class CommonSettings extends ApiBase {
 	 */
 	public function get_items_permissions_check( $request ) {
 
-		if ( ! current_user_can( 'cartflows_manage_flows_steps' ) ) {
+		// Security: Settings endpoint requires cartflows_manage_settings to prevent sensitive data exposure.
+		if ( ! current_user_can( 'cartflows_manage_settings' ) ) {
 			return new \WP_Error( 'cartflows_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'cartflows' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 

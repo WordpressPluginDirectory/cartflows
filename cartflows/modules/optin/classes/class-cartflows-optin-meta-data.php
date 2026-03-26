@@ -495,7 +495,7 @@ class Cartflows_Optin_Meta_Data extends Cartflows_Step_Meta_Base {
 								),
 							),
 						),
-						'button-bg-color'           => array(
+						'button-text-color'         => array(
 							'type'   => 'color-picker',
 							'label'  => __( 'Text Color', 'cartflows' ),
 							'name'   => 'wcf-submit-color',
@@ -555,29 +555,66 @@ class Cartflows_Optin_Meta_Data extends Cartflows_Step_Meta_Base {
 
 		$options = $this->get_data( $step_id );
 
+		// Determine whether to show CodeMirror editors or the legacy textarea.
+		$show_code_editor = \CartflowsAdmin\AdminCore\Inc\AdminHelper::should_show_code_editor();
+
+		$general_fields = array(
+			'slug'                    => array(
+				'type'          => 'text',
+				'name'          => 'step_post_name',
+				'label'         => __( 'Step Slug', 'cartflows' ),
+				'value'         => get_post_field( 'post_name' ),
+				'display_align' => 'vertical',
+			),
+			'wcf-disable-step-toggle' => array(
+				'type'         => 'toggle',
+				'label'        => __( 'Disable step', 'cartflows' ),
+				'name'         => 'wcf-disable-step',
+				'value'        => $options['wcf-disable-step'],
+				'tooltip'      => __( 'Turn this on to disable the step', 'cartflows' ),
+				'is_fullwidth' => true,
+			),
+		);
+
+		if ( $show_code_editor ) {
+			// Migration completed: show separate JS and CSS CodeMirror editors.
+			$general_fields['wcf-optin-custom-js']  = array(
+				'type'          => 'code',
+				'label'         => __( 'Custom JavaScript', 'cartflows' ),
+				'name'          => 'wcf-step-custom-js',
+				'value'         => $options['wcf-step-custom-js'],
+				'display_align' => 'vertical',
+				'language'      => 'javascript',
+				'tooltip'       => __( 'Add your own custom JavaScript code here. Do not include script tags.', 'cartflows' ),
+			);
+			$general_fields['wcf-optin-custom-css'] = array(
+				'type'          => 'code',
+				'label'         => __( 'Custom CSS', 'cartflows' ),
+				'name'          => 'wcf-step-custom-css',
+				'value'         => $options['wcf-step-custom-css'],
+				'display_align' => 'vertical',
+				'language'      => 'css',
+				'tooltip'       => __( 'Add your own custom CSS code here. Do not include style tags.', 'cartflows' ),
+			);
+		} else {
+			// Migration not completed: show the legacy combined textarea.
+			$general_fields['wcf-optin-custom-script'] = array(
+				'type'          => 'textarea',
+				'label'         => __( 'Custom Script', 'cartflows' ),
+				'name'          => 'wcf-custom-script',
+				'value'         => $options['wcf-custom-script'],
+				'tooltip'       => __( 'Add your own custom code here. If you\'re adding CSS, make sure to wrap it inside &lt;style&gt; tags.', 'cartflows' ),
+				'display_align' => 'vertical',
+			);
+		}
+
 		$settings = array(
 			'settings' => array(
 				'general'  => array(
 					'title'    => __( 'General', 'cartflows' ),
 					'slug'     => 'general',
 					'priority' => 20,
-					'fields'   => array(
-						'slug'                    => array(
-							'type'          => 'text',
-							'name'          => 'step_post_name',
-							'label'         => __( 'Step Slug', 'cartflows' ),
-							'value'         => get_post_field( 'post_name' ),
-							'display_align' => 'vertical',
-						),
-						'wcf-optin-custom-script' => array(
-							'type'          => 'textarea',
-							'label'         => __( 'Custom Script', 'cartflows' ),
-							'name'          => 'wcf-custom-script',
-							'value'         => $options['wcf-custom-script'],
-							'tooltip'       => __( 'Add your own custom code here. If you\'re adding CSS, make sure to wrap it inside &lt;style&gt; tags.', 'cartflows' ),
-							'display_align' => 'vertical',
-						),
-					),
+					'fields'   => $general_fields,
 				),
 
 				'settings' => array(
@@ -742,7 +779,6 @@ class Cartflows_Optin_Meta_Data extends Cartflows_Step_Meta_Base {
 		}
 
 		return $optin_data;
-
 	}
 
 	/**
@@ -755,13 +791,10 @@ class Cartflows_Optin_Meta_Data extends Cartflows_Step_Meta_Base {
 		$meta_option = wcf()->options->get_optin_fields( $post_id );
 
 		return $meta_option;
-
 	}
-
 }
 
 /**
  * Kicking this off by calling 'get_instance()' method.
  */
 Cartflows_Optin_Meta_Data::get_instance();
-

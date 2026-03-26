@@ -173,7 +173,7 @@ class AdminHelper {
 	/**
 	 * Get Common settings.
 	 *
-	 * @return array.
+	 * @return array
 	 */
 	public static function get_common_settings() {
 
@@ -189,7 +189,7 @@ class AdminHelper {
 			)
 		);
 
-		$common = self::get_admin_settings_option( '_cartflows_common', false, true );
+		$common = self::get_admin_settings_option( '_cartflows_common', false, false );
 
 		$common = wp_parse_args( $common, $common_default );
 
@@ -246,7 +246,7 @@ class AdminHelper {
 	/**
 	 * Get Common settings.
 	 *
-	 * @return array.
+	 * @return array
 	 */
 	public static function get_permalink_settings() {
 
@@ -276,7 +276,7 @@ class AdminHelper {
 	/**
 	 * Get Common settings.
 	 *
-	 * @return array.
+	 * @return array
 	 */
 	public static function get_facebook_settings() {
 
@@ -310,7 +310,7 @@ class AdminHelper {
 	/**
 	 * Get Common settings.
 	 *
-	 * @return array.
+	 * @return array
 	 */
 	public static function get_google_analytics_settings() {
 
@@ -343,7 +343,7 @@ class AdminHelper {
 	/**
 	 * Get Common settings.
 	 *
-	 * @return array.
+	 * @return array
 	 */
 	public static function get_tiktok_settings() {
 
@@ -377,7 +377,7 @@ class AdminHelper {
 	/**
 	 * Get Common settings of pinterest.
 	 *
-	 * @return array.
+	 * @return array
 	 */
 	public static function get_pinterest_settings() {
 
@@ -413,7 +413,7 @@ class AdminHelper {
 	 * Get Common settings.
 	 *
 	 * @since 2.1.0
-	 * @return array.
+	 * @return array
 	 */
 	public static function get_google_ads_settings() {
 
@@ -450,7 +450,7 @@ class AdminHelper {
 	 * Get Snapchat settings.
 	 *
 	 * @since 2.1.0
-	 * @return array.
+	 * @return array
 	 */
 	public static function get_snapchat_settings() {
 
@@ -485,7 +485,7 @@ class AdminHelper {
 	/**
 	 * Get User role settings.
 	 *
-	 * @return array.
+	 * @return array
 	 */
 	public static function get_user_role_management_settings() {
 		global $wp_roles;
@@ -517,7 +517,7 @@ class AdminHelper {
 	/**
 	 * Get Google Auto-Address Fields settings.
 	 *
-	 * @return array.
+	 * @return array
 	 */
 	public static function get_google_auto_fields_settings() {
 		$options = array();
@@ -535,6 +535,30 @@ class AdminHelper {
 
 		foreach ( $google_auto_fields_settings_data as $key => $data ) {
 			$options[ '_cartflows_google_auto_address[' . $key . ']' ] = $data;
+		}
+
+		return $options;
+	}
+
+	/**
+	 * Get Global CSS & Scripts settings.
+	 *
+	 * @return array.
+	 */
+	public static function get_global_scripts_settings() {
+		$options = array();
+
+		$default = array(
+			'global_css' => '',
+			'global_js'  => '',
+		);
+
+		$global_scripts = self::get_admin_settings_option( '_cartflows_global_scripts', false, false );
+
+		$global_scripts = wp_parse_args( $global_scripts, $default );
+
+		foreach ( $global_scripts as $key => $data ) {
+			$options[ '_cartflows_global_scripts[' . $key . ']' ] = $data;
 		}
 
 		return $options;
@@ -667,7 +691,8 @@ class AdminHelper {
 		$snap_settings      = self::get_snapchat_settings();
 		$urm_settings       = self::get_user_role_management_settings();
 		$auto_fields        = self::get_google_auto_fields_settings();
-		$options            = array_merge( $general_settings, $permalink_settings, $fb_settings, $tik_settings, $ga_settings, $gads_settings, $pin_settings, $snap_settings, $urm_settings, $auto_fields );
+		$global_scripts     = self::get_global_scripts_settings();
+		$options            = array_merge( $general_settings, $permalink_settings, $fb_settings, $tik_settings, $ga_settings, $gads_settings, $pin_settings, $snap_settings, $urm_settings, $auto_fields, $global_scripts );
 		$options            = apply_filters( 'cartflows_admin_global_data_options', $options );
 
 		return $options;
@@ -693,6 +718,7 @@ class AdminHelper {
 				$step_id                             = $step['id'];
 				$steps[ $in ]['title']               = get_the_title( $step_id );
 				$steps[ $in ]['is_product_assigned'] = \Cartflows_Helper::has_product_assigned( $step_id );
+				$steps[ $in ]['step_disabled']       = get_post_meta( $step_id, 'wcf-disable-step', true ) === 'yes';
 
 				$steps[ $in ]['actions']      = self::get_step_actions( $flow_id, $step_id );
 				$steps[ $in ]['menu_actions'] = self::get_step_actions( $flow_id, $step_id, 'menu' );
@@ -710,6 +736,7 @@ class AdminHelper {
 						$ab_test_variations[ $variation_in ]['actions']             = self::get_ab_test_step_actions( $flow_id, $variation['id'] );
 						$ab_test_variations[ $variation_in ]['menu_actions']        = self::get_ab_test_step_actions( $flow_id, $variation['id'], 'menu' );
 						$ab_test_variations[ $variation_in ]['is_product_assigned'] = \Cartflows_Helper::has_product_assigned( $variation['id'] );
+						$ab_test_variations[ $variation_in ]['step_disabled']       = get_post_meta( $variation['id'], 'wcf-disable-step', true ) === 'yes';
 					}
 
 					$steps[ $in ]['ab-test-variations'] = $ab_test_variations;
@@ -946,15 +973,18 @@ class AdminHelper {
 		return $actions;
 	}
 
-		/**
-		 * Calculate earning.
-		 *
-		 * @param string $start_date start date.
-		 * @param string $end_date end date.
-		 *
-		 * @return array
-		 */
-	public static function get_earnings( $start_date, $end_date ) {
+	/**
+	 * Calculate earning.
+	 *
+	 * @param string $start_date start date.
+	 * @param string $end_date end date.
+	 * @param string $flow_id flow id.
+	 * @param string $screen_type screen_type.
+	 * @param string $comparison_range_type comparison range type - 'previous-period' | 'previous-year'.
+	 *
+	 * @return array
+	 */
+	public static function get_earnings( $start_date, $end_date, $flow_id = '', $screen_type = 'funnels', $comparison_range_type = '' ) {
 
 		$currency_symbol = function_exists( 'get_woocommerce_currency_symbol' ) ? get_woocommerce_currency_symbol() : '';
 
@@ -978,11 +1008,14 @@ class AdminHelper {
 					'total_visits'         => '0',
 				),
 				$start_date,
-				$end_date
+				$end_date,
+				$flow_id,
+				$screen_type,
+				$comparison_range_type
 			);
 		}
 
-		$orders      = self::get_orders_by_flow( $start_date, $end_date );
+		$orders      = self::get_orders_by_flow( $start_date, $end_date, $flow_id );
 		$gross_sale  = 0;
 		$order_count = 0;
 
@@ -1023,9 +1056,10 @@ class AdminHelper {
 	 *
 	 * @param string $start_date start date.
 	 * @param string $end_date end date.
+	 * @param string $flow_id flow id.
 	 * @return wc_order object.
 	 */
-	public static function get_orders_by_flow( $start_date, $end_date ) {
+	public static function get_orders_by_flow( $start_date, $end_date, $flow_id = '' ) {
 
 		global $wpdb;
 
@@ -1057,9 +1091,19 @@ class AdminHelper {
 
 		$where = self::get_items_query_where( $conditions );
 
-		$where .= ' AND ( tb1.' . $order_date_key . " BETWEEN IF (tb2.meta_key='wcf-analytics-reset-date'>'" . $start_date . "', tb2.meta_key, '" . $start_date . "')  AND '" . $end_date . "' )";
+		if ( ! empty( $flow_id ) ) {
+			$where .= $wpdb->prepare( ' AND tb2.meta_value = %s', $flow_id );
+		}
+
+		// Security: Use $wpdb->prepare() for date parameters to prevent SQL injection.
+		$where .= $wpdb->prepare(
+			' AND ( tb1.' . $order_date_key . " BETWEEN IF (tb2.meta_key='wcf-analytics-reset-date'>%s, tb2.meta_key, %s)  AND %s )", // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$start_date,
+			$start_date,
+			$end_date
+		);
 		$where .= " AND ( ( tb2.meta_key = '_wcf_flow_id' ) OR ( tb2.meta_key = '_cartflows_parent_flow_id' ) )";
-		$where .= ' AND tb1.' . $order_status_key . " IN ( 'wc-completed', 'wc-processing', 'wc-cancelled' )";
+		$where .= ' AND tb1.' . $order_status_key . " IN ( 'wc-completed', 'wc-processing' )";
 
 		$query = 'SELECT tb1.ID, DATE( tb1.' . $order_date_key . ' ) date, tb2.meta_value FROM ' . $order_table . ' tb1
 		INNER JOIN ' . $order_meta_table . ' tb2
@@ -1068,7 +1112,6 @@ class AdminHelper {
 
 		return $wpdb->get_results( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery
 	}
-
 
 	/**
 	 * Prepare where items for query.
@@ -1228,5 +1271,31 @@ class AdminHelper {
 		}
 
 		update_option( 'cartflows_funnel_creation_method', $funnel_creation_stats );
+	}
+
+	/**
+	 * Determine whether to show the CodeMirror code editor fields.
+	 *
+	 * Returns true when the custom script migration status is 'completed',
+	 * meaning users should see the new separate JS and CSS code editors
+	 * instead of the old combined textarea.
+	 *
+	 * @since 2.2.2
+	 * @return bool
+	 */
+	public static function should_show_code_editor() {
+		return 'completed' === \CartFlows_Helper::get_script_migration_status();
+	}
+
+	/**
+	 * Get the field type for custom script fields based on migration status.
+	 *
+	 * Returns 'code' after migration is completed, 'textarea' otherwise.
+	 *
+	 * @since 2.2.2
+	 * @return string 'code' or 'textarea'
+	 */
+	public static function get_custom_script_field_type() {
+		return self::should_show_code_editor() ? 'code' : 'textarea';
 	}
 }

@@ -48,7 +48,74 @@ class FlowMeta {
 
 		// Check is the current flow is Store Checkout Flow.
 		$is_store_checkout_flow = intval( \Cartflows_Helper::get_global_setting( '_cartflows_store_checkout' ) ) === intval( $flow_id );
-		
+
+		// Determine whether to show CodeMirror editors or the legacy textarea.
+		$show_code_editor = AdminHelper::should_show_code_editor();
+
+		$general_fields = array(
+			'flow_slug'     => array(
+				'type'          => 'text',
+				'name'          => 'post_name',
+				'label'         => __( 'Funnel Slug', 'cartflows' ),
+				'value'         => get_post_field( 'post_name', $flow_id ),
+				'display_align' => 'vertical',
+			),
+			'flow_indexing' => array(
+				'type'          => 'select',
+				'name'          => 'wcf-flow-indexing',
+				'label'         => __( 'Disallow Indexing', 'cartflows' ),
+				'tooltip'       => __( 'Changing this will replace the default global setting. To go back to the global setting, just select Default.', 'cartflows' ),
+				'display_align' => 'vertical',
+				'options'       => array(
+					array(
+						'value' => '',
+						'label' => __( 'Default', 'cartflows' ),
+					),
+					array(
+						'value' => 'disallow',
+						'label' => __( 'Yes', 'cartflows' ),
+					),
+					array(
+						'value' => 'allow',
+						'label' => __( 'No', 'cartflows' ),
+					),
+				),
+				'value'         => get_post_meta( $flow_id, 'wcf-flow-indexing', true ),
+			),
+		);
+
+		if ( $show_code_editor ) {
+			// Migration completed: show separate JS and CSS CodeMirror editors.
+			$general_fields['flow_script_option'] = array(
+				'type'          => 'code',
+				'label'         => __( 'Funnel Custom JavaScript', 'cartflows' ),
+				'name'          => 'wcf-flow-custom-js',
+				'value'         => get_post_meta( $flow_id, 'wcf-flow-custom-js', true ),
+				'language'      => 'javascript',
+				'tooltip'       => __( 'Any JavaScript added here will run across all pages in this funnel. Do not include script tags.', 'cartflows' ),
+				'display_align' => 'vertical',
+			);
+			$general_fields['flow_style_option']  = array(
+				'type'          => 'code',
+				'label'         => __( 'Funnel Custom CSS', 'cartflows' ),
+				'name'          => 'wcf-flow-custom-css',
+				'value'         => get_post_meta( $flow_id, 'wcf-flow-custom-css', true ),
+				'language'      => 'css',
+				'tooltip'       => __( 'Any CSS added here will run across all pages in this funnel. Do not include style tags.', 'cartflows' ),
+				'display_align' => 'vertical',
+			);
+		} else {
+			// Migration not completed: show the legacy combined textarea.
+			$general_fields['script_option'] = array(
+				'type'          => 'textarea',
+				'label'         => __( 'Funnel Custom Script', 'cartflows' ),
+				'name'          => 'wcf-flow-custom-script',
+				'value'         => get_post_meta( $flow_id, 'wcf-flow-custom-script', true ),
+				'tooltip'       => __( 'Any code you add here will work across all the pages in this funnel.', 'cartflows' ),
+				'display_align' => 'vertical',
+			);
+		}
+
 		$settings = array(
 			'instant-layout'          => array(
 				'title'    => __( 'Instant Layout ', 'cartflows' ),
@@ -61,7 +128,7 @@ class FlowMeta {
 						'value'        => get_post_meta( $flow_id, 'instant-layout-style', true ),
 						'desc'         => sprintf(
 							/* translators: %1$s: Break line, %2$s: link html Start, %3$s: Link html end. */
-							__( 'This layout will replace the default page template for the Checkout, Upsell/Downsell and Thank You steps. You can customize the design %1$sin the Checkout, Upsell/Downsell and Thank You step\'s settings, under the design tab. %2$sRead More.%3$s', 'cartflows' ),
+							__( 'This layout will replace the default page template for the Checkout, Upsell/Downsell and Thank You steps. You can customize %1$sthe design in the Checkout, Upsell/Downsell and Thank You step\'s settings, under the design tab. %2$sRead More.%3$s', 'cartflows' ),
 							'<br>',
 							'<a href="https://cartflows.com/docs/cartflows-instant-checkout-layout/?utm_source=dashboard&utm_medium=free-cartflows&utm_campaign=docs" target="_blank">',
 							'</a>'
@@ -232,45 +299,7 @@ class FlowMeta {
 			'general'                 => array(
 				'title'    => __( 'General ', 'cartflows' ),
 				'slug'     => 'general',
-				'fields'   => array(
-					'flow_slug'     => array(
-						'type'          => 'text',
-						'name'          => 'post_name',
-						'label'         => __( 'Funnel Slug', 'cartflows' ),
-						'value'         => get_post_field( 'post_name', $flow_id ),
-						'display_align' => 'vertical',
-					),
-					'flow_indexing' => array(
-						'type'          => 'select',
-						'name'          => 'wcf-flow-indexing',
-						'label'         => __( 'Disallow Indexing', 'cartflows' ),
-						'tooltip'       => __( 'Changing this will replace the default global setting. To go back to the global setting, just select Default.', 'cartflows' ),
-						'display_align' => 'vertical',
-						'options'       => array(
-							array(
-								'value' => '',
-								'label' => __( 'Default', 'cartflows' ),
-							),
-							array(
-								'value' => 'disallow',
-								'label' => __( 'Yes', 'cartflows' ),
-							),
-							array(
-								'value' => 'allow',
-								'label' => __( 'No', 'cartflows' ),
-							),
-						),
-						'value'         => get_post_meta( $flow_id, 'wcf-flow-indexing', true ),
-					),
-					'script_option' => array(
-						'type'          => 'textarea',
-						'label'         => __( 'Funnel Custom Script', 'cartflows' ),
-						'name'          => 'wcf-flow-custom-script',
-						'value'         => get_post_meta( $flow_id, 'wcf-flow-custom-script', true ),
-						'tooltip'       => __( 'Any code you add here will work across all the pages in this funnel.', 'cartflows' ),
-						'display_align' => 'vertical',
-					),
-				),
+				'fields'   => $general_fields,
 				'priority' => 30,
 			),
 		);

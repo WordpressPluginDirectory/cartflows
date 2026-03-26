@@ -330,8 +330,6 @@ class Cartflows_Bricks_Checkout_Form extends \Bricks\Element {
 				
 			),
 		);
-
-
 	}
 
 	/**
@@ -375,7 +373,6 @@ class Cartflows_Bricks_Checkout_Form extends \Bricks\Element {
 				
 			),
 		);
-		
 	}
 
 	/**
@@ -779,8 +776,6 @@ class Cartflows_Bricks_Checkout_Form extends \Bricks\Element {
 				),
 			),
 		);
-
-		
 	}
 
 	/**
@@ -931,7 +926,6 @@ class Cartflows_Bricks_Checkout_Form extends \Bricks\Element {
 				
 			),
 		);
-
 	}
 
 	/**
@@ -1021,7 +1015,6 @@ class Cartflows_Bricks_Checkout_Form extends \Bricks\Element {
 				),
 			),
 		);
-
 	}
 
 	/**
@@ -1112,7 +1105,6 @@ class Cartflows_Bricks_Checkout_Form extends \Bricks\Element {
 				),
 			),
 		);
-			
 	}
 
 	/**
@@ -1192,7 +1184,6 @@ class Cartflows_Bricks_Checkout_Form extends \Bricks\Element {
 			'title' => esc_html__( 'Shipping Method', 'cartflows' ),
 			'tab'   => 'style',
 		);
-		
 	}
 	/**
 	 * Constructor function.
@@ -1207,7 +1198,6 @@ class Cartflows_Bricks_Checkout_Form extends \Bricks\Element {
 		$this->register_error_style_controls();
 		$this->register_order_review_style_controls();
 		$this->register_shipping_method_style_controls();
-
 	}
 	
 	/**
@@ -1232,7 +1222,6 @@ class Cartflows_Bricks_Checkout_Form extends \Bricks\Element {
 			</div>
 		</div>
 		<?php
-
 	}
 
 	/**
@@ -1278,5 +1267,4 @@ class Cartflows_Bricks_Checkout_Form extends \Bricks\Element {
 
 		do_action( 'cartflows_bricks_checkout_options_filters', $this->settings );
 	}
-	
 }

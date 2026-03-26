@@ -55,6 +55,7 @@ class CommonSettings extends AjaxBase {
 				'save_global_settings',
 				'regenerate_css_for_steps',
 				'track_kb_search',
+				'migrate_custom_scripts',
 			);
 			$this->init_ajax_events( $ajax_events );
 		}
@@ -86,7 +87,6 @@ class CommonSettings extends AjaxBase {
 			'messsage' => __( 'Successfully deleted the dynamic CSS keys!', 'cartflows' ),
 		);
 		wp_send_json_success( $response_data );
-
 	}
 
 	/**
@@ -138,6 +138,10 @@ class CommonSettings extends AjaxBase {
 
 			case 'integrations':
 				$this->save_integration_settings();
+				break;
+
+			case 'global_scripts':
+				$this->save_global_scripts_settings();
 				break;
 
 			default:
@@ -203,6 +207,47 @@ class CommonSettings extends AjaxBase {
 	}
 
 	/**
+	 * Save global CSS & Scripts settings.
+	 *
+	 * Note: Called from save_global_settings function.
+	 *
+	 * Note: Global scripts are stored in the '_cartflows_global_scripts' option and are
+	 * completely independent of the per-flow/per-step custom script migration. They always
+	 * use CodeMirror code editor fields regardless of the migration status
+	 * ('cartflows_script_migration_status'). No migration is needed for global scripts.
+	 *
+	 * @return void
+	 */
+	public function save_global_scripts_settings() {
+
+		/**
+		 * Nonce verification
+		 */
+		if ( ! check_ajax_referer( 'cartflows_save_global_settings', 'security', false ) ) {
+			$response_data = array( 'message' => __( 'Nonce validation failed', 'cartflows' ) );
+			wp_send_json_error( $response_data );
+		}
+
+		if ( isset( $_POST['_cartflows_global_scripts'] ) ) { //phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$raw_settings = wp_unslash( $_POST['_cartflows_global_scripts'] ); //phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+			$new_settings = array();
+
+			if ( isset( $raw_settings['global_css'] ) ) {
+				// Decode first to prevent double-encoding on repeated saves, then encode once.
+				$new_settings['global_css'] = htmlentities( html_entity_decode( $raw_settings['global_css'], ENT_QUOTES, 'UTF-8' ), ENT_QUOTES, 'UTF-8' );
+			}
+
+			if ( isset( $raw_settings['global_js'] ) ) {
+				// Decode first to prevent double-encoding on repeated saves, then encode once.
+				$new_settings['global_js'] = htmlentities( html_entity_decode( $raw_settings['global_js'], ENT_QUOTES, 'UTF-8' ), ENT_QUOTES, 'UTF-8' );
+			}
+
+			AdminHelper::update_admin_settings_option( '_cartflows_global_scripts', $new_settings, false );
+		}
+	}
+
+	/**
 	 * Save other tab settings.
 	 *
 	 * Note: Called from save_global_settings function.
@@ -257,11 +302,10 @@ class CommonSettings extends AjaxBase {
 		}
 
 		// Update the option to enable/disable the non sensitive data tracking.
-		if ( isset( $_POST['cf_analytics_optin'] ) ) {
-			$enable_non_sensative_data_tracking = sanitize_text_field( $_POST['cf_analytics_optin'] );
-			AdminHelper::update_admin_settings_option( 'cf_analytics_optin', $enable_non_sensative_data_tracking, false );
+		if ( isset( $_POST['cf_usage_optin'] ) ) {
+			$enable_non_sensative_data_tracking = sanitize_text_field( $_POST['cf_usage_optin'] );
+			AdminHelper::update_admin_settings_option( 'cf_usage_optin', $enable_non_sensative_data_tracking, false );
 		}
-
 	}
 
 	/**
@@ -288,11 +332,10 @@ class CommonSettings extends AjaxBase {
 			$new_settings = $this->sanitize_form_inputs( wp_unslash( $_POST['_cartflows_common'] ) ); //phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		}
 
-		$common_settings = get_option( '_cartflows_common', false );
+		$common_settings = AdminHelper::get_admin_settings_option( '_cartflows_common', false, false );
 		$new_settings    = wp_parse_args( $new_settings, $common_settings );
 
-		AdminHelper::update_admin_settings_option( '_cartflows_common', $new_settings, true );
-
+		AdminHelper::update_admin_settings_option( '_cartflows_common', $new_settings, false );
 	}
 
 	/**
@@ -312,7 +355,6 @@ class CommonSettings extends AjaxBase {
 		foreach ( $cf_cap as $cap ) {
 			$user_role_obj->remove_cap( $cap );
 		}
-
 	}
 
 	/**
@@ -324,6 +366,13 @@ class CommonSettings extends AjaxBase {
 	 * @return void
 	 */
 	public function add_selected_cf_cap( $user_role_obj, $access_key ) {
+
+		// Security: Validate access_key against allowlist to prevent privilege escalation.
+		$allowed_keys = array( 'access_to_cartflows', 'access_to_flows_and_step', 'no_access' );
+
+		if ( ! in_array( $access_key, $allowed_keys, true ) ) {
+			return;
+		}
 
 		switch ( $access_key ) {
 
@@ -337,7 +386,7 @@ class CommonSettings extends AjaxBase {
 				break;
 
 			default:
-				$user_role_obj->add_cap( '' );
+				// No capabilities to add for 'no_access'.
 				break;
 
 		}
@@ -353,9 +402,16 @@ class CommonSettings extends AjaxBase {
 	 */
 	public function user_role_management( $new_settings, $old_settings ) {
 
+		// Security: Protect administrator role from modification via this endpoint.
+		$protected_roles = array( 'administrator' );
+
 		foreach ( $new_settings as $user_role => $access_key ) {
 
-			if ( $old_settings[ $user_role ] !== $access_key ) {
+			if ( in_array( $user_role, $protected_roles, true ) ) {
+				continue;
+			}
+
+			if ( ! isset( $old_settings[ $user_role ] ) || $old_settings[ $user_role ] !== $access_key ) {
 
 				$user_role_obj = get_role( $user_role );
 
@@ -480,6 +536,10 @@ class CommonSettings extends AjaxBase {
 	 * @return void
 	 */
 	public function track_kb_search() {
+		if ( ! current_user_can( 'cartflows_manage_settings' ) ) {
+			wp_send_json_error( array( 'message' => $this->get_error_msg( 'permission' ) ) );
+		}
+
 		/**
 		 * Nonce verification
 		 */
@@ -508,5 +568,38 @@ class CommonSettings extends AjaxBase {
 		update_option( 'cartflows_kb_searches', $kb_searches );
 
 		wp_send_json_success( array( 'message' => 'Search term tracked successfully' ) );
+	}
+
+	/**
+	 * Handle on-demand custom script migration triggered by user clicking "Migrate Data".
+	 *
+	 * Verifies nonce and capabilities, calls the migration logic from Cartflows_Update,
+	 * and returns a JSON response with the migrated post count.
+	 *
+	 * @since 2.2.2
+	 * @return void
+	 */
+	public function migrate_custom_scripts() {
+
+		$response_data = array( 'message' => $this->get_error_msg( 'permission' ) );
+
+		if ( ! current_user_can( 'cartflows_manage_settings' ) ) {
+			wp_send_json_error( $response_data );
+		}
+
+		if ( ! check_ajax_referer( 'cartflows_migrate_custom_scripts', 'security', false ) ) {
+			$response_data = array( 'message' => $this->get_error_msg( 'nonce' ) );
+			wp_send_json_error( $response_data );
+		}
+
+		$migrated_count = \Cartflows_Update::get_instance()->migrate_custom_scripts_on_demand();
+
+		wp_send_json_success(
+			array(
+				/* translators: %d: number of posts migrated */
+				'message'        => sprintf( __( 'Migration completed successfully. %d post(s) migrated.', 'cartflows' ), $migrated_count ),
+				'migrated_count' => $migrated_count,
+			)
+		);
 	}
 }
